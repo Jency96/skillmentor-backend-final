@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.stemlink.skillmentor.constants.UserRoles.ROLE_ADMIN;
+import static com.stemlink.skillmentor.constants.UserRoles.ROLE_STUDENT;
+
 @RestController
 @RequestMapping(path = "/api/v1/sessions")
 @RequiredArgsConstructor
@@ -27,34 +30,40 @@ public class SessionController extends AbstractController {
     private final SessionService sessionService;
 
     @GetMapping
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public List<Session> getAllSessions() {
         return sessionService.getAllSessions();
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public Session getSessionById(@PathVariable Long id) {
         return sessionService.getSessionById(id);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public Session createSession(@Valid @RequestBody SessionDTO sessionDTO) {
         return sessionService.createNewSession(sessionDTO);
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public Session updateSession(@PathVariable Long id, @Valid @RequestBody SessionDTO updatedSessionDTO) {
         return sessionService.updateSessionById(id, updatedSessionDTO);
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public void deleteSession(@PathVariable Long id) {
         sessionService.deleteSession(id);
     }
 
     // Enrollment endpoint for students to enroll in a session
     @PostMapping("/enroll")
+    @PreAuthorize("hasRole('" + ROLE_STUDENT + "')")
     public ResponseEntity<SessionResponseDTO> enroll(
-            @RequestBody SessionDTO sessionDTO,
+            @Valid @RequestBody SessionDTO sessionDTO,
             Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         Session session = sessionService.enrollSession(userPrincipal, sessionDTO);
@@ -62,6 +71,7 @@ public class SessionController extends AbstractController {
     }
 
     @GetMapping("/my-sessions")
+    @PreAuthorize("hasRole('" + ROLE_STUDENT + "')")
     public ResponseEntity<List<SessionResponseDTO>> getMySessions(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         List<Session> sessions = sessionService.getSessionsByStudentEmail(userPrincipal.getEmail());

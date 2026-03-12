@@ -54,6 +54,19 @@ public class SecurityConfig {
                         ).permitAll()
                         // Public read access to mentors from home page
                         .requestMatchers(HttpMethod.GET, "/api/v1/mentors", "/api/v1/mentors/*").permitAll()
+
+                     // Admin-only create operations used by frontend admin dashboard
+                        .requestMatchers(HttpMethod.GET, "/api/v1/subjects", "/api/v1/subjects/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/subjects").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/subjects/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/subjects/*").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/mentors").hasRole("ADMIN")
+
+                        // Admin-only endpoints
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
             .addFilterBefore(clerkAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

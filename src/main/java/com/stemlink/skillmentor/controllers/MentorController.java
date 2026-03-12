@@ -2,7 +2,6 @@ package com.stemlink.skillmentor.controllers;
 
 import com.stemlink.skillmentor.dto.MentorDTO;
 import com.stemlink.skillmentor.entities.Mentor;
-import com.stemlink.skillmentor.security.UserPrincipal;
 import com.stemlink.skillmentor.services.MentorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,31 +43,16 @@ public class MentorController extends AbstractController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('" + ROLE_ADMIN + "', '" + ROLE_MENTOR + "')")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public ResponseEntity<Mentor> createMentor(@Valid @RequestBody MentorDTO mentorDTO, Authentication authentication) {
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
         Mentor mentor = modelMapper.map(mentorDTO, Mentor.class);
-
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!isAdmin || mentorDTO.getMentorId() == null) {
-            // MENTOR role, or ADMIN without explicit identity fields in body → use JWT claims
-            mentor.setMentorId(userPrincipal.getId());
-            mentor.setFirstName(userPrincipal.getFirstName());
-            mentor.setLastName(userPrincipal.getLastName());
-            mentor.setEmail(userPrincipal.getEmail());
-        }
-        // else: ADMIN provided mentorId (+ firstName/lastName/email) in body → ModelMapper already mapped them
-
         Mentor createdMentor = mentorService.createNewMentor(mentor);
-
         return sendCreatedResponse(createdMentor);
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("hasAnyRole('" + ROLE_ADMIN + "', '" + ROLE_MENTOR + "')")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public ResponseEntity<Mentor> updateMentor(@PathVariable Long id, @Valid @RequestBody MentorDTO updatedMentorDTO) {
         Mentor mentor = modelMapper.map(updatedMentorDTO, Mentor.class);
         Mentor updatedMentor = mentorService.updateMentorById(id, mentor);

@@ -30,19 +30,21 @@ public class StudentController extends AbstractController{
     private final ModelMapper modelMapper;
 
     @GetMapping
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public ResponseEntity<List<Student>> getAllStudents() {
         List<Student> students = studentService.getAllStudents();
         return sendOkResponse(students);
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public ResponseEntity<Student> getStudentById(@PathVariable Integer id) {
         Student student = studentService.getStudentById(id);
         return sendOkResponse(student);
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('" + ROLE_ADMIN + "', '" + ROLE_STUDENT + "')")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public ResponseEntity<Student> createStudent(@Valid @RequestBody StudentDTO studentDTO, Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
@@ -57,7 +59,7 @@ public class StudentController extends AbstractController{
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("hasAnyRole('" + ROLE_ADMIN + "', '" + ROLE_STUDENT + "')")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public ResponseEntity<Student> updateStudent(@PathVariable Integer id, @Valid @RequestBody StudentDTO updatedStudentDTO) {
         Student student = modelMapper.map(updatedStudentDTO, Student.class);
         Student updatedStudent = studentService.updateStudentById(id, student);

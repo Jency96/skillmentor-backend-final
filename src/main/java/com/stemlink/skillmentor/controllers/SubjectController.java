@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.stemlink.skillmentor.constants.UserRoles.ROLE_ADMIN;
+
 @RestController
 @RequestMapping(path = "/api/v1/subjects")
 @RequiredArgsConstructor
@@ -21,11 +23,13 @@ public class SubjectController {
     private final SubjectService subjectService;
 
     @GetMapping
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public List<Subject> getAllSubjects() {
         return subjectService.getAllSubjects();
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public Subject getSubjectById(@PathVariable Long id) {
         return subjectService.getSubjectById(id);
     }
@@ -42,18 +46,21 @@ public class SubjectController {
 //    }
 
     @PostMapping
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public Subject createSubject(@Valid @RequestBody SubjectDTO subjectDTO) {
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
         return subjectService.addNewSubject(subjectDTO.getMentorId(), subject);
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public Subject updateSubject(@PathVariable Long id, @RequestBody SubjectDTO updatedSubjectDTO) {
         Subject subject = modelMapper.map(updatedSubjectDTO, Subject.class);
         return subjectService.updateSubjectById(id, subject);
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('" + ROLE_ADMIN + "')")
     public void deleteSubject(@PathVariable Long id) {
         subjectService.deleteSubject(id);
     }
